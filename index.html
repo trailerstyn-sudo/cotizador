@@ -38,7 +38,7 @@ td.q{width:68px;text-align:center}td.q input{width:58px;text-align:center;font-w
 .lista{background:var(--card);border:2px solid var(--line);padding:10px;overflow-x:auto}
 .lista td.r,.lista th.r{text-align:right;white-space:nowrap}
 .lista td small{color:var(--mut)}.lista tr.tot td{font-weight:800;background:var(--chip)}.lista tr.big td{font-size:17px}
-.pend{color:var(--warn);font-weight:700}input.bad{border-color:var(--warn)!important;outline:2px solid var(--warn)}.empty{padding:14px;color:var(--mut)}
+.pend{color:var(--warn);font-weight:700}.lista td.pu{color:var(--mut);white-space:nowrap}input.bad{border-color:var(--warn)!important;outline:2px solid var(--warn)}.empty{padding:14px;color:var(--mut)}
 .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .b{border:1px solid var(--line);background:var(--chip);border-radius:6px;padding:8px 13px;font-weight:600}.b.p{background:var(--sel);color:var(--selt)}
 .note{font-size:12px;color:var(--mut);margin-top:10px}
@@ -140,16 +140,16 @@ function calc(){const Gm=new Map();perfil();const pp=$("pdfp");if(pp)pp.hidden=t
  const all=[...Gm.values()],base=all.filter(g=>!g.acc&&(g.v>0||g.pend)),acc=all.filter(g=>g.acc&&(g.v>0||g.pend));
  ACC.forEach(i=>{const a=T.acc[i],aq=AQ[i]!=null?AQ[i]:1;if(aq>0)acc.push({n:a.n,v:a.p*NT*aq,pend:!(a.p>0),keys:[],q:NT*aq,st:BASE})});
  const sum=a=>a.reduce((s,g)=>s+(g.pend&&!(g.v>0)?0:g.v),0),lab=g=>(g.q!==1||NT>1?g.q+" × ":"")+g.n;
- const row=g=>{const d=desc(g.keys,g.st);return`<tr><td><b>${E(lab(g))}</b>${d?`<br><small>${E(d)}</small>`:""}</td><td class="r">${g.pend&&!(g.v>0)?'<span class="pend">A confirmar</span>':"<b>"+M(g.v)+"</b>"+(g.pend?'<br><small class="pend">+ ítem a confirmar</small>':"")}</td></tr>`};
+ const row=g=>{const d=desc(g.keys,g.st);return`<tr><td><b>${E(lab(g))}</b>${d?`<br><small>${E(d)}</small>`:""}</td><td class="r">${g.pend&&!(g.v>0)?'<span class="pend">A confirmar</span>':"<b>"+M(g.v)+"</b>"+(g.pend?'<br><small class="pend">+ ítem a confirmar</small>':"")}</td><td class="r pu">${g.q>0&&g.v>0?M(g.v/g.q):""}</td></tr>`};
  const res=$("res");
  if(!base.length&&!acc.length){res.innerHTML='<div class="empty">Elegí las opciones de arriba y el presupuesto se arma solo.</div>';$("nt").textContent="";window.__txt=null;LAST=null;return}
- {const pr=g=>g.pend&&!(g.v>0)?"A confirmar":M(g.v)+(g.pend?" + a confirmar":""),rr=g=>({t:lab(g),d:desc(g.keys,g.st),p:pr(g),pend:g.pend&&!(g.v>0)}),tb=sum(base)+sum(acc);
+ {const pr=g=>g.pend&&!(g.v>0)?"A confirmar":M(g.v)+(g.pend?" + a confirmar":""),rr=g=>({t:lab(g),d:desc(g.keys,g.st),p:pr(g),u:g.q>0&&g.v>0?M(g.v/g.q):"",pend:g.pend&&!(g.v>0)}),tb=sum(base)+sum(acc);
   LAST={rows:[...base.map(rr),...(base.length&&acc.length?[{t:"TOTAL TRAILER"+(NT>1?"S":""),p:M(sum(base)),tot:1}]:[]),...acc.map(rr),{t:"TOTAL COMPLETO"+(NT>1?" ("+NT+" trailers)":""),p:M(tb),tot:1,big:1}],pend:[...base,...acc].some(g=>g.pend),
    ext:(pun()!==T.pdef||mext()>0)?"Puntera "+fm(pun())+" m"+(mext()>0?" + "+fm(mext())+" m adicionales":""):""}}
- let t=`<table><tr><th>Detalle</th><th class="r">Precio final</th></tr>`+base.map(row).join("");
- if(base.length&&acc.length)t+=`<tr class="tot"><td>TOTAL TRAILER${NT>1?"S":""}</td><td class="r">${M(sum(base))}</td></tr>`;
+ let t=`<table><tr><th>Detalle</th><th class="r">Precio final</th><th class="r">Precio unitario</th></tr>`+base.map(row).join("");
+ if(base.length&&acc.length)t+=`<tr class="tot"><td>TOTAL TRAILER${NT>1?"S":""}</td><td class="r">${M(sum(base))}</td><td></td></tr>`;
  t+=acc.map(row).join("");const tot=sum(base)+sum(acc);
- t+=`<tr class="tot big"><td>TOTAL COMPLETO${NT>1?" ("+NT+" trailers)":""}</td><td class="r">${M(tot)}</td></tr>`;
+ t+=`<tr class="tot big"><td>TOTAL COMPLETO${NT>1?" ("+NT+" trailers)":""}</td><td class="r">${M(tot)}</td><td></td></tr>`;
  res.innerHTML=t+"</table>";
  const pend=[...base,...acc].some(g=>g.pend);
  $("nt").textContent=(T.respaldo?"(Sin conexión a la lista de precios: se muestran precios guardados) ":"")+(T.ivaTxt||"")+(T.fecha?" · Precios vigentes al "+T.fecha:"")+". Presupuesto orientativo, sujeto a confirmación."+(pend?" Los ítems “a confirmar” no están incluidos en el total.":"");
@@ -186,14 +186,14 @@ function paginas(info){const DPI=200,mm=DPI/25.4,W=Math.round(210*mm),H=Math.rou
  if(info.n>1){font(4.2*mm,1);cx.fillStyle=mut;cx.fillText("Cantidad:",M,y);font(4.6*mm,1);cx.fillStyle=ink;cx.fillText(info.n+" trailers",M+32*mm,y-0.3*mm);y+=7*mm}
  y+=3*mm;
  // tabla
- const cP=W-M-45*mm,wD=cP-M-6*mm,bottom=H-M-18*mm;
- const cab=()=>{cx.fillStyle=band;cx.fillRect(M,y,W-2*M,8*mm);cx.fillStyle=ink;font(4*mm,1);cx.fillText("Detalle",M+2*mm,y+2*mm);cx.textAlign="right";cx.fillText("Precio final",W-M-2*mm,y+2*mm);cx.textAlign="left";y+=8*mm};
+ const xU=W-M-2*mm,xF=W-M-40*mm,cP=W-M-80*mm,wD=cP-M-6*mm,bottom=H-M-18*mm;
+ const cab=()=>{cx.fillStyle=band;cx.fillRect(M,y,W-2*M,8*mm);cx.fillStyle=ink;font(4*mm,1);cx.fillText("Detalle",M+2*mm,y+2*mm);cx.textAlign="right";cx.fillText("Precio final",xF,y+2*mm);cx.fillText("P. unitario",xU,y+2*mm);cx.textAlign="left";y+=8*mm};
  cab();
  const fila=(t,d,p,o)=>{font(o.tot?4.6*mm:4.3*mm,1);const tl=wrap(t,wD);font(3.6*mm);const dl=d?wrap(d,wD):[];const h=tl.length*5.6*mm+dl.length*4.6*mm+3.5*mm;
   if(y+h>bottom){nueva();cab()}
   if(o.tot){cx.fillStyle=band;cx.fillRect(M,y,W-2*M,h)}let yy=y+1.8*mm;cx.fillStyle=ink;font(o.tot?4.6*mm:4.3*mm,1);tl.forEach(l=>{cx.fillText(l,M+2*mm,yy);yy+=5.6*mm});
   cx.fillStyle=mut;font(3.6*mm);dl.forEach(l=>{cx.fillText(l,M+2*mm,yy);yy+=4.6*mm});
-  cx.textAlign="right";font(o.big?5.2*mm:4.3*mm,1);cx.fillStyle=o.pend?"#b3261e":ink;cx.fillText(p,W-M-2*mm,y+1.8*mm);cx.textAlign="left";
+  cx.textAlign="right";font(o.big?5.2*mm:4.3*mm,1);cx.fillStyle=o.pend?"#b3261e":ink;cx.fillText(p,xF,y+1.8*mm);if(o.u){font(4*mm);cx.fillStyle=mut;cx.fillText(o.u,xU,y+2.1*mm)}cx.textAlign="left";
   y+=h;cx.fillStyle=line;cx.fillRect(M,y,W-2*M,0.25*mm)};
  info.rows.forEach(r=>fila(r.t,r.d,r.p,r));
  y+=5*mm;
